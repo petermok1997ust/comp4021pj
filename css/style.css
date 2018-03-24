@@ -1,0 +1,58 @@
+.canvas{
+  width:80vw;
+  height: 90vh;
+  background-color: grey;
+  margin: 0 0 0 0;
+  padding: : 0 0 0 0;
+  border: solid yellow 1px;
+}
+
+#start-screen{
+  width:80vw;
+  height: 90vh;
+  border: white solid;
+  position: absolute;
+  color: white;
+}
+
+#logo{
+  font-size: 3em;
+}
+
+.button{
+    font-size: 1.8em;
+    color: grey;
+}
+
+.button:hover{
+    font-size: 2em;
+    color: red;
+}
+
+#game-screen{
+  /* opacity: 0.4; */
+    display: none;
+}
+
+#gameboy{
+  position: absolute;
+  left: 10vw;
+}
+
+#result{
+  position: relative;
+  left:90%;
+  text-decoration-color: grey;
+  font-size: 0.5em;
+
+}
+
+#logo_img{
+  height: 30vh;
+}
+
+body{
+  background-color: black;
+  font-size: 30px;
+  user-select: none;
+}
