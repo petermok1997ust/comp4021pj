@@ -1,32 +1,48 @@
 .canvas{
   width:80vw;
   height: 90vh;
-  background-color: grey;
+  /* background-color: grey; */
   margin: 0 0 0 0;
   padding: : 0 0 0 0;
-  border: solid yellow 1px;
+  border: solid white 1px;
 }
 
 #start-screen{
-  width:80vw;
+  /* width:80vw;
   height: 90vh;
-  border: white solid;
+  border: white solid; */
   position: absolute;
   color: white;
 }
+
+#instruction-canvas{
+  position: absolute;
+  background-color: grey;
+  color: white;
+  opacity: 0.9;
+  display: none;
+}
+
+#close-instruction{
+    position: relative;
+    left: 92%;
+    color: white;
+}
+
 
 #logo{
   font-size: 3em;
 }
 
 .button{
-    font-size: 1.8em;
+    font-size: 1.2em;
     color: grey;
 }
 
 .button:hover{
-    font-size: 2em;
+    font-size: 1.3em;
     color: red;
+    text-decoration: underline;
 }
 
 #game-screen{
@@ -41,8 +57,8 @@
 
 #result{
   position: relative;
-  left:90%;
-  text-decoration-color: grey;
+  left:80%;
+  color: white;
   font-size: 0.5em;
 
 }
@@ -50,6 +66,36 @@
 #logo_img{
   height: 30vh;
 }
+
+#restart-button{
+  position: absolute;
+  top: 2%;
+  left: 2%;
+}
+
+#restart-button:hover{
+  opacity: 0.5;
+}
+
+.maze{
+  position: absolute;
+  left: 10%;
+  width: 80%;
+  height: 60%;
+  border:double blue 5px;
+}
+
+.control-panel{
+  position: relative;
+  top: 65%;
+  left: 10%;
+  width: 80%;
+  height: 20%;
+  border:solid yellow 5px;
+  border-radius: 10px;
+  background-color: grey;
+}
+
 
 body{
   background-color: black;
