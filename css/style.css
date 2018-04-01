@@ -81,8 +81,8 @@
 }
 
 #maze {
-  width: 50vw;
-  height: 50vw;
+  width: 35vw;
+  height: 35vw;
   margin: 0 10%;
   position: relative;
 }
