@@ -95,7 +95,7 @@ function movePlayer(newX, newY) {
           top: (newY*CELL_HEIGHT)+'%',
           width: CELL_WIDTH+'%',
           height: CELL_HEIGHT+'%',
-      }, MOVE_DURATION);
+      });
       playerXY = [newX, newY];
       setTimeout(function(){
         moving = false;
