@@ -2,9 +2,12 @@ const NB_ROW = 16;
 const NB_COL = 16;
 const CELL_WIDTH = 100/NB_COL;
 const CELL_HEIGHT = 100/NB_ROW;
+const MOVE_DURATION = 150;
 
+var keydown = false;
 var maze = generateMaze();
 var playerXY = [1,1];
+var moving = false;
 
 function generateMaze() {
     return [
@@ -27,7 +30,11 @@ function generateMaze() {
     ];
 }
 
-function afterPlayerMove() {
+function afterPlayerMove(x, y) {
+    if(keydown && !moving){
+      movePlayer(x, y);
+    }
+      console.log(x, y);
 }
 
 function generateJQueryEle(type) {
@@ -79,15 +86,22 @@ function canMove(x, y) {
 }
 
 function movePlayer(newX, newY) {
-    if(!canMove(newX, newY)) return;
-    $('#pac-man').css({
-        left: (newX*CELL_WIDTH)+'%',
-        top: (newY*CELL_HEIGHT)+'%',
-        width: CELL_WIDTH+'%',
-        height: CELL_HEIGHT+'%',
-    });
-    playerXY = [newX, newY];
-    afterPlayerMove();
+    var diff_x = playerXY[0] - newX;
+    var diff_y = playerXY[1] - newY;
+      if(!canMove(newX, newY)) return;
+      moving = true;
+      $('#pac-man').css({
+          left: (newX*CELL_WIDTH)+'%',
+          top: (newY*CELL_HEIGHT)+'%',
+          width: CELL_WIDTH+'%',
+          height: CELL_HEIGHT+'%',
+      }, MOVE_DURATION);
+      playerXY = [newX, newY];
+      setTimeout(function(){
+        moving = false;
+        afterPlayerMove(newX - diff_x, newY - diff_y);
+      }, MOVE_DURATION);
+
 }
 
 $(function() {
@@ -99,19 +113,29 @@ $(function() {
 
     $(document).keydown(function(e) {
         var curPos = $('#pac-man').position();
-        switch(e.keyCode) {
-            case 37: // left
-                movePlayer(playerXY[0]-1, playerXY[1]);
-                return false;
-            case 38: // up
-                movePlayer(playerXY[0], playerXY[1]-1);
-                return false;
-            case 39: // right
-                movePlayer(playerXY[0]+1, playerXY[1]);
-                return false;
-            case 40: // down
-                movePlayer(playerXY[0], playerXY[1]+1);
-                return false;
+        if(!keydown && ! moving){
+          keydown = true;
+          console.log("keydown");
+          switch(e.keyCode) {
+              case 37: // left
+                  movePlayer(playerXY[0]-1, playerXY[1]);
+                  return false;
+              case 38: // up
+                  movePlayer(playerXY[0], playerXY[1]-1);
+                  return false;
+              case 39: // right
+                  movePlayer(playerXY[0]+1, playerXY[1]);
+                  return false;
+              case 40: // down
+                  movePlayer(playerXY[0], playerXY[1]+1);
+                  return false;
+          }
         }
+    });
+
+    $(document).keyup(function(e) {
+      console.log("keyup");
+      if(keydown)
+        keydown = false;
     });
 });

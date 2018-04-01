@@ -20,7 +20,7 @@
   flex-grow: 1;
 }
 
-#buttons { 
+#buttons {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -81,8 +81,8 @@
 }
 
 #maze {
-  width: 35vw;
-  height: 35vw;
+  width: 50vw;
+  height: 50vw;
   margin: 0 10%;
   position: relative;
 }
