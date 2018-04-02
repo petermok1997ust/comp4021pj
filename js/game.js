@@ -23,12 +23,8 @@ var time = 120;
 var score = 0;
 var countDownTaskId;
 var monsterMoveTaskId;
-var gameStarted = false;
-var num_coin = 0;
 var ultraMode = false;
 var ultraTimeout;
-var countDownTaskId;
-var gameStarted = false;
 var audioCoin;
 var audioDamage;
 var audioStartScreen;
@@ -65,23 +61,20 @@ function generateJQueryEle(type) {
   var ele;
   switch(type) {
     case '#':
-    ele = $('<img class="svg" src="img/block.svg"/>');
-    break;
-    case '0':
-    return;
+      ele = $('<img class="svg" src="img/block.svg"/>');
+      break;
     case 'P':
-    ele = $('<img id="pac-man" class="svg" src="img/pac-man.svg"/>');
-    break;
+      ele = $('<img id="pac-man" class="svg" src="img/pac-man.svg"/>');
+      break;
     case 'M':
-    ele = $('<img class="ghost svg" src="img/ghost.svg"/>');
-    break;
+      ele = $('<img class="ghost svg" src="img/ghost.svg"/>');
+      break;
     case 'C':
-    ele = $('<img class="svg coin" src="img/coin.svg"/>');
-    break;
+      ele = $('<img class="svg coin" src="img/coin.svg"/>');
+      break;
     case 'S':
-    ele = $('<img class="svg pill" src="img/pill.svg"/>');
-
-    break;
+      ele = $('<img class="svg pill" src="img/pill.svg"/>');
+      break;
   }
   if(ele) {
     ele.css({
@@ -92,15 +85,11 @@ function generateJQueryEle(type) {
   return ele;
 }
 
-function occupied(x, y) {
-  return maze[y*NB_COL+x] !== '0';
-}
-
 function generatePills() {
   var pills = [];
   for(var i = 0; i < NB_ROW; i++) {
     for(var j = 0; j < NB_COL; j++) {
-      if(!occupied(j, i)) {
+      if(canMove(j, i)) {
         if(Math.random() < 0.08) {
           var ele = generateJQueryEle('S');
           ele.css({
@@ -112,7 +101,6 @@ function generatePills() {
             y: i,
             obj: ele
           });
-          maze[i*NB_COL+j] = 'S';
         }
       }
     }
@@ -120,15 +108,13 @@ function generatePills() {
   return pills;
 }
 
-
 function generateCoins() {
   var coins = [];
   while(coins.length <= 0) {
     for(var i = 0; i < NB_ROW; i++) {
       for(var j = 0; j < NB_COL; j++) {
-        if(!occupied(j, i)) {
+        if(canMove(j, i)) {
           if(Math.random() < 0.3) { // 30% to place a coin here
-            num_coin++;
             var ele = generateJQueryEle('C');
             ele.css({
               left: (j*CELL_WIDTH)+'%',
@@ -139,7 +125,6 @@ function generateCoins() {
               y: i,
               obj: ele
             });
-            maze[i*NB_COL+j] = 'C';
           }
         }
       }
@@ -168,7 +153,6 @@ function generateMonsters() {
       obj: ele,
       attack:true
     });
-    maze[monsterY*NB_COL+monsterX] = 'M';
   }
   return monsters;
 }
@@ -212,11 +196,6 @@ function addElementToMap(maze) {
   for(var p of pills) {
     mazeDiv.append(p.obj);
   }
-
-  if(num_coin==0)
-  showVictory();
-
-
 }
 
 function getRandomColor() {
@@ -235,14 +214,12 @@ function gameOver() {
     $("#result-win").text(LOST_TEXT);
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
-    gameStarted = false;
     audioLose.play();
 }
 
 function showVictory() {
     clearInterval(countDownTaskId);
     clearTimeout(monsterMoveTaskId);
-    gameStarted = false;
     $(document).off('keydown');
     $("#result-win").text(VICTORY_TEXT);
     $("#result-score").text(score);
@@ -281,37 +258,32 @@ function afterShowGameScreen() {
     var curPos = $('#pac-man').position();
     if(!keydown && ! moving){
       keydown = true;
-      // $('#pac-man').css({transform: 'rotate(0deg)'});
       console.log("keydown");
       switch(e.keyCode) {
         case 37: // left
-        $('#pac-man').css({transform: 'rotate(180deg)'});
-        movePlayer(playerXY[0]-1, playerXY[1]);
-        return false;
+          $('#pac-man').css({transform: 'rotate(180deg)'});
+          movePlayer(playerXY[0]-1, playerXY[1]);
+          return false;
         case 38: // up
-        $('#pac-man').css({transform: 'rotate(270deg)'});
-        movePlayer(playerXY[0], playerXY[1]-1);
-        return false;
+          $('#pac-man').css({transform: 'rotate(270deg)'});
+          movePlayer(playerXY[0], playerXY[1]-1);
+          return false;
         case 39: // right
-        $('#pac-man').css({transform: 'rotate(0deg)'});
-        movePlayer(playerXY[0]+1, playerXY[1]);
-        return false;
+          $('#pac-man').css({transform: 'rotate(0deg)'});
+          movePlayer(playerXY[0]+1, playerXY[1]);
+          return false;
         case 40: // down
-        $('#pac-man').css({transform: 'rotate(90deg)'});
-        movePlayer(playerXY[0], playerXY[1]+1);
-        return false;
+          $('#pac-man').css({transform: 'rotate(90deg)'});
+          movePlayer(playerXY[0], playerXY[1]+1);
+          return false;
       }
     }
   });
 
   $(document).keyup(function(e) {
-    console.log("keyup");
-    if(keydown)
-    keydown = false;
+    if(keydown) keydown = false;
   });
-  gameStarted = true;
   getMonsterMove();
-
 }
 
 function canMove(x, y) {
@@ -330,13 +302,8 @@ function afterPlayerMove(x, y) {
         // remove from DOM after animation
         coin.obj.remove();
       });
-      coins.splice(i, 1);
+      coins.splice(i, 1); // remove so that next time will not be check again
       onGetCoin();
-      score += 10;
-      num_coin--
-      $('#current-score').text(score);
-      if(num_coin === 0)
-      showVictory();
     }
   }
 
@@ -344,10 +311,8 @@ function afterPlayerMove(x, y) {
   for(var i = monsters.length-1; i >= 0; i--) {
     var monster = monsters[i];
     if(monster.x === x && monster.y === y && monster.attack == true) {
-      if(ultraMode)
-      getKilled(monster);
-      else
-      onGetDamage();
+      if(ultraMode) getKilled(monster);
+      else onGetDamage();
     }
   }
 
@@ -380,6 +345,8 @@ function afterPlayerMove(x, y) {
       }, ULTRA_MODE_TIME);
     }
   }
+
+  if(coins.length <= 0) showVictory();
 }
 
 function getKilled(monster){
@@ -448,48 +415,41 @@ function moveMonster(monster, x, y){
   return true;
 }
 function getMonsterMove(){
-
-    if (gameStarted) {
-        for(var i = monsters.length-1; i >= 0; i--) {
-            var monster = monsters[i];
-            var diffX = monsters[i].x - playerXY[0];
-            var diffY = monsters[i].y - playerXY[1];
-            var moved = false;
-            var num = Math.random();
-            if(diffX > 0 && num >0.5){
-                moved = moveMonster(monster, monster.x-1 , monster.y);
-            } else if(diffX < 0){
-                moved = moveMonster(monster, monster.x+1 , monster.y);
-            } else if(diffY > 0 && num >0.3){
-                moved = moveMonster(monster, monster.x , monster.y-1);
-            } else{
-                moved = moveMonster(monster, monster.x , monster.y+1);
-            }
-            if(!moved) randomMove(monster);
-            if(monster.x === playerXY[0] && monster.y === playerXY[1] && monster.attack == true) {
-                if(ultraMode)
-                    getKilled(monster);
-                else
-                    onGetDamage();
-            }
-        }
-        monsterMoveTaskId = setTimeout(getMonsterMove, MONSTER_MOVE_DURATION);
-    }
+  for(var i = monsters.length-1; i >= 0; i--) {
+      var monster = monsters[i];
+      var diffX = monsters[i].x - playerXY[0];
+      var diffY = monsters[i].y - playerXY[1];
+      var moved = false;
+      var num = Math.random();
+      if(diffX > 0 && num >0.5){
+          moved = moveMonster(monster, monster.x-1 , monster.y);
+      } else if(diffX < 0){
+          moved = moveMonster(monster, monster.x+1 , monster.y);
+      } else if(diffY > 0 && num >0.3){
+          moved = moveMonster(monster, monster.x , monster.y-1);
+      } else{
+          moved = moveMonster(monster, monster.x , monster.y+1);
+      }
+      if(!moved) randomMove(monster);
+      if(monster.x === playerXY[0] && monster.y === playerXY[1] && monster.attack == true) {
+          if(ultraMode)
+              getKilled(monster);
+          else
+              onGetDamage();
+      }
+  }
+  monsterMoveTaskId = setTimeout(getMonsterMove, MONSTER_MOVE_DURATION);
 }
 
 function randomMove(monster) {
-  if(!gameStarted) return;
   var num = Math.random();
   // console.log(num);
-  if(num>0.7)
-  moveMonster(monster, monster.x+1 , monster.y);
-  else if (num>0.4 & num <0.7)
-  moveMonster(monster, monster.x-1 , monster.y);
-  else if (num>0.2 & num <0.4)
-  moveMonster(monster, monster.x , monster.y -1);
-  else
-  moveMonster(monster, monster.x , monster.y+1);
+  if(num>0.7) moveMonster(monster, monster.x+1 , monster.y);
+  else if (num>0.4 & num <0.7) moveMonster(monster, monster.x-1 , monster.y);
+  else if (num>0.2 & num <0.4) moveMonster(monster, monster.x , monster.y -1);
+  else moveMonster(monster, monster.x , monster.y+1);
 }
+
 function onGetCoin() {
   score += 10;
   $('#current-score').text(score);
@@ -499,6 +459,7 @@ function onGetCoin() {
 function restart() {
     monsters = [];
     coins = [];
+    pills = [];
     moving = false;
     keydown = false;
     life = 3;
