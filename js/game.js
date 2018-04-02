@@ -20,8 +20,11 @@ var time = 120;
 var score = 0;
 var countDownTaskId;
 var gameStarted = false;
-var num_coin = 0;
-
+var audioCoin;
+var audioDamage;
+var audioStartScreen;
+var audioVictory;
+var audioLose;
 
 function generateMaze() {
     return [
@@ -75,27 +78,24 @@ function generateJQueryEle(type) {
     return ele;
 }
 
-function occupied(x, y) {
-    return maze[y*NB_COL+x] !== '0';
-}
-
 function generateCoins() {
     var coins = [];
-    for(var i = 0; i < NB_ROW; i++) {
-        for(var j = 0; j < NB_COL; j++) {
-            if(!occupied(j, i)) {
-                if(Math.random() < 0.3) { // 30% to place a coin here
-                    num_coin++;
-                    var ele = generateJQueryEle('C');
-                    ele.css({
-                        left: (j*CELL_WIDTH)+'%',
-                        top: (i*CELL_HEIGHT)+'%'
-                    });
-                    coins.push({
-                        x: j,
-                        y: i,
-                        obj: ele
-                    });
+    while(coins.length <= 0) { // make sure there is at least some coins
+        for(var i = 0; i < NB_ROW; i++) {
+            for(var j = 0; j < NB_COL; j++) {
+                if(canMove(j, i)) {
+                    if(Math.random() < 0.3) { // 30% to place a coin here
+                        var ele = generateJQueryEle('C');
+                        ele.css({
+                            left: (j*CELL_WIDTH)+'%',
+                            top: (i*CELL_HEIGHT)+'%'
+                        });
+                        coins.push({
+                            x: j,
+                            y: i,
+                            obj: ele
+                        });
+                    }
                 }
             }
         }
@@ -122,7 +122,6 @@ function generateMonsters() {
             y: monsterY,
             obj: ele
         });
-        maze[monsterY*NB_COL+monsterX] = 'M';
     }
     return monsters;
 }
@@ -161,8 +160,6 @@ function addElementToMap(maze) {
     for(var c of coins) {
         mazeDiv.append(c.obj);
     }
-    if(num_coin==0)
-      showVictory();
 }
 
 function getRandomColor() {
@@ -181,6 +178,7 @@ function gameOver() {
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
     gameStarted = false;
+    audioLose.play();
 }
 
 function showVictory() {
@@ -190,6 +188,7 @@ function showVictory() {
     $("#result-win").text(VICTORY_TEXT);
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
+    audioVictory.play();
 }
 
 function countDown() {
@@ -200,9 +199,20 @@ function countDown() {
     }
 }
 
+function initAudio() {
+    audioCoin = document.createElement('audio');
+    audioCoin.setAttribute('src', 'sound/coin.mp3');
+    audioDamage = document.createElement('audio');
+    audioDamage.setAttribute('src', 'sound/damage.mp3');
+    audioVictory = document.createElement('audio');
+    audioVictory.setAttribute('src', 'sound/winning.mp3');
+    audioLose = document.createElement('audio');
+    audioLose.setAttribute('src', 'sound/lose.mp3');
+}
+
 function afterShowGameScreen() {
     addElementToMap(maze);
-
+    initAudio();
     $('#current-life').text(life);
     $('#current-time').text(time);
     countDownTaskId = setInterval(countDown, 1000);
@@ -261,12 +271,8 @@ function afterPlayerMove(x, y) {
                 // remove from DOM after animation
                 coin.obj.remove();
             });
-            coins.splice(i, 1);
-            score += 10;
-            num_coin--
-            $('#current-score').text(score);
-            if(num_coin === 0)
-              showVictory();
+            coins.splice(i, 1); // remove so that next time will not check it again
+            onGetCoin()
         }
     }
 
@@ -277,12 +283,22 @@ function afterPlayerMove(x, y) {
             onGetDamage();
         }
     }
+
+    if(coins.length === 0)
+      showVictory();
 }
 
 function onGetDamage() {
     life--;
     if(life <= 0) gameOver();
     $('#current-life').text(life);
+    audioDamage.play();
+}
+
+function onGetCoin() {
+    score += 10;
+    $('#current-score').text(score);
+    audioCoin.play();
 }
 
 function movePlayer(newX, newY) {
@@ -367,6 +383,14 @@ $(function() {
         $("#game-screen").show();
         $("#start-screen").hide();
         afterShowGameScreen();
-
+        audioStartScreen.pause();
     });
+
+    audioStartScreen = document.createElement('audio');
+    audioStartScreen.setAttribute('src', 'sound/background.mp3');
+    audioStartScreen.play();
+    audioStartScreen.addEventListener('ended', function() {
+        this.play(); // repeat forever
+    }, false);
+
 });
