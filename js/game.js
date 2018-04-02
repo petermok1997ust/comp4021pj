@@ -9,14 +9,14 @@ const LOST_TEXT = "YOU ARE LOST";
 const VICTORY_TEXT = "YOU WIN!";
 const ULTRA_MODE_TIME = 10*1000;//10 second
 const REBORN_TIME = 10*1000;//10 second
+const NB_PILL = 3;
 
 var keydown = false;
-var maze = generateMaze();
-var playerXY = [1,1];
-var monsterXY = [5,2];
+var maze;
 var monsters = [];
 var coins = [];
 var pills = [];
+var playerXY = [1, 1];
 var moving = false;
 var life = 3;
 var time = 120;
@@ -57,6 +57,24 @@ function generateMaze() {
   ];
 }
 
+function setCellFree(x, y) {
+  maze[y*NB_COL+x] = '0';
+}
+
+function getFreeCells() {
+  var free = [];
+  for(var x = 0; x < NB_COL; x++) {
+    for(var y = 0; y < NB_ROW; y++) {
+      if(!occupied(x, y)) free.push([x, y]);
+    }
+  }
+  return free;
+}
+
+function occupied(x, y) {
+  return maze[y*NB_COL+x] !== '0';
+}
+
 function generateJQueryEle(type) {
   var ele;
   switch(type) {
@@ -87,45 +105,44 @@ function generateJQueryEle(type) {
 
 function generatePills() {
   var pills = [];
-  for(var i = 0; i < NB_ROW; i++) {
-    for(var j = 0; j < NB_COL; j++) {
-      if(canMove(j, i)) {
-        if(Math.random() < 0.08) {
-          var ele = generateJQueryEle('S');
-          ele.css({
-            left: (j*CELL_WIDTH)+'%',
-            top: (i*CELL_HEIGHT)+'%'
-          });
-          pills.push({
-            x: j,
-            y: i,
-            obj: ele
-          });
-        }
-      }
-    }
+  var freeCells = getFreeCells();
+  for(var i = 0; i < NB_PILL; i++) {
+    var idx = Math.floor(Math.random() * freeCells.length);
+    var [x, y] = freeCells[idx];
+    var ele = generateJQueryEle('S');
+    ele.css({
+      left: (x*CELL_WIDTH)+'%',
+      top: (y*CELL_HEIGHT)+'%'
+    });
+    pills.push({
+      x: x,
+      y: y,
+      obj: ele
+    });
+    maze[y*NB_COL+x] = 'S';
+    freeCells.splice(idx, 1);
   }
   return pills;
 }
 
 function generateCoins() {
   var coins = [];
-  while(coins.length <= 0) {
-    for(var i = 0; i < NB_ROW; i++) {
-      for(var j = 0; j < NB_COL; j++) {
-        if(canMove(j, i)) {
-          if(Math.random() < 0.3) { // 30% to place a coin here
-            var ele = generateJQueryEle('C');
-            ele.css({
-              left: (j*CELL_WIDTH)+'%',
-              top: (i*CELL_HEIGHT)+'%'
-            });
-            coins.push({
-              x: j,
-              y: i,
-              obj: ele
-            });
-          }
+  while(coins.length <= 0) { // make sure there is at least some coins
+    for(var y = 0; y < NB_ROW; y++) {
+      for(var x = 0; x < NB_COL; x++) {
+        // if(coins.length >= 20) return coins;
+        if(!occupied(x, y) && Math.random() < 0.3) { // 30% to place a coin here
+          var ele = generateJQueryEle('C');
+          ele.css({
+            left: (x*CELL_WIDTH)+'%',
+            top: (y*CELL_HEIGHT)+'%'
+          });
+          coins.push({
+            x: x,
+            y: y,
+            obj: ele
+          });
+          maze[y*NB_COL+x] = 'C';
         }
       }
     }
@@ -135,24 +152,23 @@ function generateCoins() {
 
 function generateMonsters() {
   var monsters = [];
-  var [x, y] = monsterXY;
-  for(var i = 0; i < NUM_MONSTER;i++) {
+  var freeCells = getFreeCells();
+  for(var i = 0; i < NUM_MONSTER; i++) {
+    var idx = Math.floor(Math.random()*freeCells.length);
+    var [x, y] = freeCells[idx];
     var ele = generateJQueryEle('M');
     var color = getRandomColor();
-    // console.log(color);
-    var monsterX = x+i;
-    var monsterY = y+i;
     ele.css({
-      left: (monsterX*CELL_WIDTH)+'%',
-      top: (monsterY*CELL_HEIGHT)+'%',
-      // background: color
+      left: (x*CELL_WIDTH)+'%',
+      top: (y*CELL_HEIGHT)+'%'
     });
     monsters.push({
-      x: monsterX,
-      y: monsterY,
+      x: x,
+      y: y,
       obj: ele,
       attack:true
     });
+    freeCells.splice(idx, 1);
   }
   return monsters;
 }
@@ -171,21 +187,6 @@ function addElementToMap(maze) {
     }
   }
 
-  // place the player
-  var [x, y] = playerXY;
-  var ele = generateJQueryEle('P');
-  ele.css({
-    left: (x*CELL_WIDTH)+'%',
-    top: (y*CELL_HEIGHT)+'%',
-  });
-  mazeDiv.append(ele);
-
-  // place monster
-  monsters = generateMonsters();
-  for(var m of monsters) {
-    mazeDiv.append(m.obj);
-  }
-
   // place coins
   coins = generateCoins();
   for(var c of coins) {
@@ -196,6 +197,21 @@ function addElementToMap(maze) {
   for(var p of pills) {
     mazeDiv.append(p.obj);
   }
+
+  // place monster
+  monsters = generateMonsters();
+  for(var m of monsters) {
+    mazeDiv.append(m.obj);
+  }
+
+  // place the player
+  var [x, y] = playerXY;
+  var ele = generateJQueryEle('P');
+  ele.css({
+    left: (x*CELL_WIDTH)+'%',
+    top: (y*CELL_HEIGHT)+'%',
+  });
+  mazeDiv.append(ele);
 }
 
 function getRandomColor() {
@@ -247,6 +263,7 @@ function initAudio() {
 }
 
 function afterShowGameScreen() {
+  maze = generateMaze();
   addElementToMap(maze);
   initAudio();
   $('#current-life').text(life);
@@ -258,7 +275,6 @@ function afterShowGameScreen() {
     var curPos = $('#pac-man').position();
     if(!keydown && ! moving){
       keydown = true;
-      console.log("keydown");
       switch(e.keyCode) {
         case 37: // left
           $('#pac-man').css({transform: 'rotate(180deg)'});
@@ -296,13 +312,11 @@ function afterPlayerMove(x, y) {
   for(var i = coins.length-1; i >= 0; i--) {
     var coin = coins[i];
     if(coin.x === x && coin.y === y) {
-      coin.obj.animate({ top: ((y-1)*CELL_HEIGHT)+'%' }, 1000)
+      coin.obj.animate({ top: ((coin.y-1)*CELL_HEIGHT)+'%' }, 1000)
       .delay(MOVE_DURATION)
-      .animate({ opacity: 0 }, 500, function() {
-        // remove from DOM after animation
-        coin.obj.remove();
-      });
+      .animate({ opacity: 0 }, 500);
       coins.splice(i, 1); // remove so that next time will not be check again
+      setCellFree(x, y);
       onGetCoin();
     }
   }
@@ -322,10 +336,7 @@ function afterPlayerMove(x, y) {
       clearTimeout(ultraTimeout);
       pill.obj.animate({ top: ((y-1)*CELL_HEIGHT)+'%' }, 1000)
       .delay(MOVE_DURATION)
-      .animate({ opacity: 0 }, 500, function() {
-        // remove from DOM after animation
-        pill.obj.remove();
-      });
+      .animate({ opacity: 0 }, 500);
       ultraMode = true;
       for(var i = monsters.length-1; i >= 0; i--) {
         var monster = monsters[i];
@@ -343,6 +354,9 @@ function afterPlayerMove(x, y) {
           });
         }
       }, ULTRA_MODE_TIME);
+
+      pills.splice(i, 1);
+      setCellFree(pill.x, pill.y);
     }
   }
 
@@ -355,7 +369,6 @@ function getKilled(monster){
   monster.obj.animate({ top: ((monster.y-1)*CELL_HEIGHT)+'%' }, 1000)
   .delay(MOVE_DURATION)
   .animate({ opacity: 0 }, 500, function() {
-    // remove from DOM after animation
     monster.attack = false;
   });
   setTimeout(function(){
