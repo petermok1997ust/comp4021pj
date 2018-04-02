@@ -1,5 +1,5 @@
-const NB_ROW = 16;
-const NB_COL = 16;
+const NB_ROW = 20;
+const NB_COL = 25;
 const CELL_WIDTH = 100/NB_COL;
 const CELL_HEIGHT = 100/NB_ROW;
 const MOVE_DURATION = 150;
@@ -240,6 +240,17 @@ function countDown() {
   }
 }
 
+function initAudio() {
+  audioCoin = document.createElement('audio');
+  audioCoin.setAttribute('src', 'sound/coin.mp3');
+  audioDamage = document.createElement('audio');
+  audioDamage.setAttribute('src', 'sound/damage.mp3');
+  audioVictory = document.createElement('audio');
+  audioVictory.setAttribute('src', 'sound/winning.mp3');
+  audioLose = document.createElement('audio');
+  audioLose.setAttribute('src', 'sound/lose.mp3');
+}
+
 function afterShowGameScreen() {
   addElementToMap(maze);
 
@@ -315,9 +326,9 @@ function afterPlayerMove(x, y) {
     var monster = monsters[i];
     if(monster.x === x && monster.y === y && monster.attack == true) {
       if(ultraMode)
-        getKilled(monster);
+      getKilled(monster);
       else
-        onGetDamage();
+      onGetDamage();
     }
   }
 
@@ -334,18 +345,18 @@ function afterPlayerMove(x, y) {
       ultraMode = true;
       for(var i = monsters.length-1; i >= 0; i--) {
         var monster = monsters[i];
-          monster.obj.css({
-            'background-color': 'blue'
-          });
+        monster.obj.css({
+          'background-color': 'blue'
+        });
       }
 
       ultraTimeout = setTimeout(function(){
         ultraMode = false;
         for(var i = monsters.length-1; i >= 0; i--) {
           var monster = monsters[i];
-            monster.obj.css({
-              'background-color':""
-            });
+          monster.obj.css({
+            'background-color':""
+          });
         }
       }, ULTRA_MODE_TIME);
     }
@@ -364,8 +375,8 @@ function getKilled(monster){
   setTimeout(function(){
     monster.obj.css({
       'opacity':'1' ,
-  });
-  monster.attack = true;
+    });
+    monster.attack = true;
   }, REBORN_TIME);
 }
 
@@ -374,7 +385,14 @@ function onGetDamage() {
     life--;
     if(life <= 0) gameOver();
     $('#current-life').text(life);
+    audioDamage.play();
   }
+}
+
+function onGetCoin() {
+  score += 10;
+  $('#current-score').text(score);
+  audioCoin.play();
 }
 
 function movePlayer(newX, newY) {
@@ -463,6 +481,14 @@ $(function() {
     $("#game-screen").show();
     $("#start-screen").hide();
     afterShowGameScreen();
-
+    audioStartScreen.pause();
   });
+
+  audioStartScreen = document.createElement('audio');
+  audioStartScreen.setAttribute('src', 'sound/background.mp3');
+  audioStartScreen.play();
+  audioStartScreen.addEventListener('ended', function() {
+    this.play(); // repeat forever
+  }, false);
+
 });
