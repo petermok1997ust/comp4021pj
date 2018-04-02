@@ -6,6 +6,7 @@ const MOVE_DURATION = 150;
 const MONSTER_MOVE_DURATION = 1000;
 const NUM_MONSTER = 5;
 const LOST_TEXT = "YOU ARE LOST";
+const VICTORY_TEXT = "YOU WIN!";
 
 var keydown = false;
 var maze = generateMaze();
@@ -19,6 +20,7 @@ var time = 120;
 var score = 0;
 var countDownTaskId;
 var gameStarted = false;
+var num_coin = 0;
 
 
 function generateMaze() {
@@ -79,6 +81,7 @@ function generateCoins() {
         for(var j = 0; j < NB_COL; j++) {
             if(!occupied(j, i)) {
                 if(Math.random() < 0.3) { // 30% to place a coin here
+                    num_coin++;
                     var ele = generateJQueryEle('C');
                     ele.css({
                         left: (j*CELL_WIDTH)+'%',
@@ -154,6 +157,8 @@ function addElementToMap(maze) {
     for(var c of coins) {
         mazeDiv.append(c.obj);
     }
+    if(num_coin==0)
+      showVictory();
 }
 
 function getRandomColor() {
@@ -169,6 +174,16 @@ function gameOver() {
     clearInterval(countDownTaskId);
     $(document).off('keydown');
     $("#result-win").text(LOST_TEXT);
+    $("#result-score").text(score);
+    $("#game-result").show(MOVE_DURATION);
+    gameStarted = false;
+}
+
+function showVictory() {
+    clearInterval(countDownTaskId);
+    gameStarted = false;
+    $(document).off('keydown');
+    $("#result-win").text(VICTORY_TEXT);
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
 }
@@ -244,7 +259,10 @@ function afterPlayerMove(x, y) {
             });
             coins.splice(i, 1);
             score += 10;
+            num_coin--
             $('#current-score').text(score);
+            if(num_coin === 0)
+              showVictory();
         }
     }
 
@@ -326,6 +344,7 @@ function getMonsterMove(){
 }
 
 function randomMove(monster) {
+  if(!gameStarted) return;
   var num = Math.random();
   // console.log(num);
   if(num>0.7)
