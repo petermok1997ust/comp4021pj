@@ -47,10 +47,19 @@
     text-decoration: underline;
 }
 
-#game-screen{
+#game-screen {
     width: 100%;
     height: 100%;
     display: none;
+}
+
+#game-screen-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #gameboy {
@@ -71,13 +80,24 @@
 }
 
 .top-bar {
+  width: 100%;
   height: 10%;
-  top: 2%;
-  left: 2%;
+  color: white;
+  display: flex;
 }
 
-.top-bar-button:hover {
-  opacity: 0.5;
+.top-bar #score {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.top-bar #time {
+  flex-grow: 2;
+  text-align: center;
+}
+
+.top-bar #life {
+  flex-grow: 1;
 }
 
 #maze {
@@ -138,7 +158,5 @@ body{
 #game-result{
   background: white;
   position: absolute;
-  top: 25vh;
-  left: 25vw;
   display: none;
 }

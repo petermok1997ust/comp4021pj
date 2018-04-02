@@ -22,6 +22,7 @@ var life = 3;
 var time = 120;
 var score = 0;
 var countDownTaskId;
+var monsterMoveTaskId;
 var gameStarted = false;
 var num_coin = 0;
 var ultraMode = false;
@@ -228,21 +229,25 @@ function getRandomColor() {
 }
 
 function gameOver() {
-  clearInterval(countDownTaskId);
-  $(document).off('keydown');
-  $("#result-win").text(LOST_TEXT);
-  $("#result-score").text(score);
-  $("#game-result").show(MOVE_DURATION);
-  gameStarted = false;
+    clearInterval(countDownTaskId);
+    clearTimeout(monsterMoveTaskId);
+    $(document).off('keydown');
+    $("#result-win").text(LOST_TEXT);
+    $("#result-score").text(score);
+    $("#game-result").show(MOVE_DURATION);
+    gameStarted = false;
+    audioLose.play();
 }
 
 function showVictory() {
-  clearInterval(countDownTaskId);
-  gameStarted = false;
-  $(document).off('keydown');
-  $("#result-win").text(VICTORY_TEXT);
-  $("#result-score").text(score);
-  $("#game-result").show(MOVE_DURATION);
+    clearInterval(countDownTaskId);
+    clearTimeout(monsterMoveTaskId);
+    gameStarted = false;
+    $(document).off('keydown');
+    $("#result-win").text(VICTORY_TEXT);
+    $("#result-score").text(score);
+    $("#game-result").show(MOVE_DURATION);
+    audioVictory.play();
 }
 
 function countDown() {
@@ -444,35 +449,32 @@ function moveMonster(monster, x, y){
 }
 function getMonsterMove(){
 
-  if (gameStarted) {
-    for(var i = monsters.length-1; i >= 0; i--) {
-      var monster = monsters[i];
-      var diffX = monsters[i].x - playerXY[0];
-      var diffY = monsters[i].y - playerXY[1];
-      var moved = false;
-      var num = Math.random();
-      if(diffX > 0 && num >0.5){
-        moved = moveMonster(monster, monster.x-1 , monster.y);
-      }else if(diffX < 0){
-        moved = moveMonster(monster, monster.x+1 , monster.y);
-      }else if(diffY > 0 && num >0.3){
-        moved = moveMonster(monster, monster.x , monster.y-1);
-      }else{
-        moved = moveMonster(monster, monster.x , monster.y+1);
-      }
-      if(!moved)
-      randomMove(monster);
-      if(monster.x === playerXY[0] && monster.y === playerXY[1] && monster.attack == true) {
-        if(ultraMode)
-        getKilled(monster);
-        else
-        onGetDamage();
-
-      }
+    if (gameStarted) {
+        for(var i = monsters.length-1; i >= 0; i--) {
+            var monster = monsters[i];
+            var diffX = monsters[i].x - playerXY[0];
+            var diffY = monsters[i].y - playerXY[1];
+            var moved = false;
+            var num = Math.random();
+            if(diffX > 0 && num >0.5){
+                moved = moveMonster(monster, monster.x-1 , monster.y);
+            } else if(diffX < 0){
+                moved = moveMonster(monster, monster.x+1 , monster.y);
+            } else if(diffY > 0 && num >0.3){
+                moved = moveMonster(monster, monster.x , monster.y-1);
+            } else{
+                moved = moveMonster(monster, monster.x , monster.y+1);
+            }
+            if(!moved) randomMove(monster);
+            if(monster.x === playerXY[0] && monster.y === playerXY[1] && monster.attack == true) {
+                if(ultraMode)
+                    getKilled(monster);
+                else
+                    onGetDamage();
+            }
+        }
+        monsterMoveTaskId = setTimeout(getMonsterMove, MONSTER_MOVE_DURATION);
     }
-  }
-  setTimeout(getMonsterMove, MONSTER_MOVE_DURATION);
-
 }
 
 function randomMove(monster) {
@@ -494,19 +496,35 @@ function onGetCoin() {
   audioCoin.play();
 }
 
-$(function() {
-  $("#start-button").click(function(){
-    $("#game-screen").show();
-    $("#start-screen").hide();
+function restart() {
+    monsters = [];
+    coins = [];
+    moving = false;
+    keydown = false;
+    life = 3;
+    time = 120;
+    score = 0;
+    playerXY = [1, 1];
+    $('#maze').empty();
     afterShowGameScreen();
-    audioStartScreen.pause();
-  });
+    $("#game-result").hide();
+}
 
-  audioStartScreen = document.createElement('audio');
-  audioStartScreen.setAttribute('src', 'sound/background.mp3');
-  audioStartScreen.play();
-  audioStartScreen.addEventListener('ended', function() {
-    this.play(); // repeat forever
-  }, false);
+$(function() {
+    $("#start-button").click(function(){
+        $("#game-screen").show();
+        $("#start-screen").hide();
+        afterShowGameScreen();
+        audioStartScreen.pause();
+    });
+
+    $('#restart').click(restart);
+
+    audioStartScreen = document.createElement('audio');
+    audioStartScreen.setAttribute('src', 'sound/background.mp3');
+    audioStartScreen.play();
+    audioStartScreen.addEventListener('ended', function() {
+        this.play(); // repeat forever
+    }, false);
 
 });

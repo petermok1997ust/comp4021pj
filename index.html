@@ -27,22 +27,18 @@
       </div>
 
       <div id="game-screen" class="canvas">
-        <div class="top-bar">
-          <img class="top-bar-button" id="end-game"  src="img/exit.svg"/>
-          <img class="top-bar-button" id="restart-button" src="img/restart.svg"/>
-          <div id="result">
-            Score: <span id="current-score">0</span><br>
-            Life: <span id="current-life">0</span><br>
-            Time: <span id="current-time">0</span>
+        <div id="game-screen-content">
+          <div class="top-bar">
+            <div id="life">Life: <span id="current-life">0</span></div>
+            <div id="time"><span id="current-time">0</span></div>
+            <div id="score">Score: <span id="current-score">0</span></div>
           </div>
-        </div>
-        <div id="maze">
-        </div>
-        <div id="game-result">
-          Result: <span id="result-win">win</span><br>
-          Score: <span id="result-score">100</span><br>
-          <span id="restart" class="button">Restart</span>
-          <span id="quit" class="button">Quit</span>
+          <div id="maze"></div>
+          <div id="game-result">
+            <span id="result-win">win</span><br>
+            Score: <span id="result-score">100</span><br>
+            <span id="restart" class="button">Restart</span>
+          </div>
         </div>
       </div>
     </div>
