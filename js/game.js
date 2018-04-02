@@ -3,7 +3,9 @@ const NB_COL = 16;
 const CELL_WIDTH = 100/NB_COL;
 const CELL_HEIGHT = 100/NB_ROW;
 const MOVE_DURATION = 150;
+const MONSTER_MOVE_DURATION = 1000;
 const NUM_MONSTER = 5;
+const LOST_TEXT = "YOU ARE LOST";
 
 var keydown = false;
 var maze = generateMaze();
@@ -16,6 +18,8 @@ var life = 3;
 var time = 120;
 var score = 0;
 var countDownTaskId;
+var gameStarted = false;
+
 
 function generateMaze() {
     return [
@@ -104,7 +108,7 @@ function generateMonsters() {
         ele.css({
                 left: (monsterX*CELL_WIDTH)+'%',
                 top: (monsterY*CELL_HEIGHT)+'%',
-                background: color
+                // background: color
         });
         monsters.push({
             x: monsterX,
@@ -164,6 +168,9 @@ function getRandomColor() {
 function gameOver() {
     clearInterval(countDownTaskId);
     $(document).off('keydown');
+    $("#result-win").text(LOST_TEXT);
+    $("#result-score").text(score);
+    $("#game-result").show(MOVE_DURATION);
 }
 
 function countDown() {
@@ -214,6 +221,9 @@ function afterShowGameScreen() {
       if(keydown)
         keydown = false;
     });
+    gameStarted = true;
+    getMonsterMove();
+
 }
 
 function canMove(x, y) {
@@ -269,7 +279,6 @@ function movePlayer(newX, newY) {
     afterPlayerMove(newX, newY);
     setTimeout(function(){
         moving = false;
-        
         if(keydown && !moving){
             movePlayer(newX - diffX, newY - diffY);
         }
@@ -277,47 +286,64 @@ function movePlayer(newX, newY) {
 
 }
 
+function moveMonster(monster, x, y){
+  if(!canMove(x, y)) return false;
+    monster.obj.css({
+      left: (x*CELL_WIDTH)+'%',
+      top: (y*CELL_HEIGHT)+'%',
+    });
+    monster.x = x;
+    monster.y = y;
+    return true;
+}
+function getMonsterMove(){
+
+    if (gameStarted) {
+      for(var i = monsters.length-1; i >= 0; i--) {
+          var monster = monsters[i];
+          var diffX = monsters[i].x - playerXY[0];
+          var diffY = monsters[i].y - playerXY[1];
+          var moved = false;
+          var num = Math.random();
+          if(diffX > 0 && num >0.5){
+            moved = moveMonster(monster, monster.x-1 , monster.y);
+          }else if(diffX < 0){
+            moved = moveMonster(monster, monster.x+1 , monster.y);
+          }else if(diffY > 0 && num >0.3){
+            moved = moveMonster(monster, monster.x , monster.y-1);
+          }else{
+            moved = moveMonster(monster, monster.x , monster.y+1);
+          }
+          if(!moved)
+            randomMove(monster);
+          if(monster.x === playerXY[0] && monster.y === playerXY[1]) {
+              onGetDamage();
+          }
+      }
+    }
+    setTimeout(getMonsterMove, MONSTER_MOVE_DURATION);
+
+}
+
+function randomMove(monster) {
+  var num = Math.random();
+  // console.log(num);
+  if(num>0.7)
+    moveMonster(monster, monster.x+1 , monster.y);
+  else if (num>0.4 & num <0.7)
+    moveMonster(monster, monster.x-1 , monster.y);
+  else if (num>0.2 & num <0.4)
+    moveMonster(monster, monster.x , monster.y -1);
+  else
+    moveMonster(monster, monster.x , monster.y+1);
+}
+
+
 $(function() {
     $("#start-button").click(function(){
         $("#game-screen").show();
         $("#start-screen").hide();
         afterShowGameScreen();
+
     });
-});
-
-/*
- * Replace all SVG images with inline SVG
- */
-jQuery('img.svg').each(function(){
-    var $img = jQuery(this);
-    var imgID = $img.attr('id');
-    var imgClass = $img.attr('class');
-    var imgURL = $img.attr('src');
-
-    jQuery.get(imgURL, function(data) {
-        // Get the SVG tag, ignore the rest
-        var $svg = jQuery(data).find('svg');
-
-        // Add replaced image's ID to the new SVG
-        if(typeof imgID !== 'undefined') {
-            $svg = $svg.attr('id', imgID);
-        }
-        // Add replaced image's classes to the new SVG
-        if(typeof imgClass !== 'undefined') {
-            $svg = $svg.attr('class', imgClass+' replaced-svg');
-        }
-
-        // Remove any invalid XML tags as per http://validator.w3.org
-        $svg = $svg.removeAttr('xmlns:a');
-
-        // Check if the viewport is set, if the viewport is not set the SVG wont't scale.
-        if(!$svg.attr('viewBox') && $svg.attr('height') && $svg.attr('width')) {
-            $svg.attr('viewBox', '0 0 ' + $svg.attr('height') + ' ' + $svg.attr('width'))
-        }
-
-        // Replace image with new SVG
-        $img.replaceWith($svg);
-
-    }, 'xml');
-
 });
