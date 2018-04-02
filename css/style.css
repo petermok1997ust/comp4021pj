@@ -116,3 +116,12 @@ body{
   position: absolute;
   transition: all 0.3s;
 }
+
+.coin {
+  animation: coin-rotate 2s linear 0s infinite;
+}
+
+@keyframes coin-rotate {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-360deg); }
+}
