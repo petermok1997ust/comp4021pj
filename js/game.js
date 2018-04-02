@@ -333,10 +333,12 @@ function afterPlayerMove(x, y) {
   for(var i = pills.length-1; i >= 0; i--) {
     var pill = pills[i];
     if(pill.x === x && pill.y === y) {
+      console.log("hi");
       clearTimeout(ultraTimeout);
       pill.obj.animate({ top: ((y-1)*CELL_HEIGHT)+'%' }, 1000)
       .delay(MOVE_DURATION)
-      .animate({ opacity: 0 }, 500);
+      .css({ display:"none" }, 500);
+      pills.splice(i, 1);
       ultraMode = true;
       for(var i = monsters.length-1; i >= 0; i--) {
         var monster = monsters[i];
@@ -355,7 +357,6 @@ function afterPlayerMove(x, y) {
         }
       }, ULTRA_MODE_TIME);
 
-      pills.splice(i, 1);
       setCellFree(pill.x, pill.y);
     }
   }
