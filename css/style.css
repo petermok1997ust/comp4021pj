@@ -8,6 +8,7 @@
   opacity: 0.9;
   border: 2px solid white;
   border-radius: 5px;
+  width: 50%;
 }
 
 #game-description {
