@@ -386,6 +386,15 @@ function onGetDamage() {
     if(life <= 0) gameOver();
     $('#current-life').text(life);
     audioDamage.play();
+    
+    
+    $('#pac-man').css({
+		'background-color': 'red'
+	});
+	setTimeout(function(){
+		$('#pac-man').css({
+			'background-color': ''
+		});},2000);
   }
 }
 
@@ -482,13 +491,13 @@ function restart() {
     playerXY = [1, 1];
     $('#maze').empty();
     afterShowGameScreen();
-    $("#game-result").hide();
+    $("#game-result").fadeOut(500);
 }
 
 $(function() {
     $("#start-button").click(function(){
         $("#game-screen").show();
-        $("#start-screen").hide();
+        $("#start-screen").fadeOut(1000);
         afterShowGameScreen();
         audioStartScreen.pause();
     });
