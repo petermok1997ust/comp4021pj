@@ -23,6 +23,7 @@ var time = 120;
 var score = 0;
 var countDownTaskId;
 var monsterMoveTaskId;
+var scoreTaskId;
 var ultraMode = false;
 var ultraTimeout;
 var audioCoin;
@@ -227,6 +228,7 @@ function gameOver() {
     clearInterval(countDownTaskId);
     clearTimeout(monsterMoveTaskId);
     $(document).off('keydown');
+    $("#maze").addClass('game-over');
     $("#result-win").text(LOST_TEXT);
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
@@ -246,6 +248,9 @@ function showVictory() {
 function countDown() {
   time-=1;
   $('#current-time').text(time);
+  if(time <= 10) {
+    $('#current-time').addClass('timer-end-soon');
+  }
   if(time <= 0) {
     gameOver();
   }
@@ -268,7 +273,7 @@ function afterShowGameScreen() {
   initAudio();
   $('#current-life').text(life);
   $('#current-time').text(time);
-  countDownTaskId = setInterval(countDown, 1000);
+  $('#current-score').text(score);
 
   // add control
   $(document).keydown(function(e) {
@@ -300,6 +305,8 @@ function afterShowGameScreen() {
     if(keydown) keydown = false;
   });
   getMonsterMove();
+
+  countDownTaskId = setInterval(countDown, 1000);
 }
 
 function canMove(x, y) {
@@ -367,15 +374,10 @@ function afterPlayerMove(x, y) {
 function getKilled(monster){
   var temp_x = monster.x;
   var temp_y = monster.y;
-  monster.obj.animate({ top: ((monster.y-1)*CELL_HEIGHT)+'%' }, 1000)
-  .delay(MOVE_DURATION)
-  .animate({ opacity: 0 }, 500, function() {
-    monster.attack = false;
-  });
+  monster.obj.hide();
+  monster.attack = false;
   setTimeout(function(){
-    monster.obj.css({
-      'opacity':'1' ,
-    });
+    monster.obj.show();
     monster.attack = true;
   }, REBORN_TIME);
 }
@@ -401,6 +403,13 @@ function onGetDamage() {
 function onGetCoin() {
   score += 10;
   $('#current-score').text(score);
+  $('#current-score').addClass('gain');
+  if(scoreTaskId) {
+    clearTimeout(scoreTaskId);
+  }
+  scoreTaskId = setTimeout(function() {
+    $('#current-score').removeClass('gain');
+  }, 1000);
   audioCoin.play();
 }
 
@@ -473,12 +482,6 @@ function randomMove(monster) {
   else moveMonster(monster, monster.x , monster.y+1);
 }
 
-function onGetCoin() {
-  score += 10;
-  $('#current-score').text(score);
-  audioCoin.play();
-}
-
 function restart() {
     monsters = [];
     coins = [];
@@ -492,14 +495,16 @@ function restart() {
     $('#maze').empty();
     afterShowGameScreen();
     $("#game-result").fadeOut(500);
+    $('#maze').removeClass('game-over');
+    $('#current-time').removeClass('timer-end-soon');
 }
 
 $(function() {
     $("#start-button").click(function(){
-        $("#game-screen").show();
-        $("#start-screen").fadeOut(1000);
-        afterShowGameScreen();
-        audioStartScreen.pause();
+      $("#start-screen").hide();
+      $("#game-screen").show(1000);
+      afterShowGameScreen();
+      audioStartScreen.pause();
     });
 
     $('#restart').click(restart);

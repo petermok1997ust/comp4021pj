@@ -9,6 +9,7 @@
   border: 2px solid white;
   border-radius: 5px;
   width: 50%;
+  font-size: 22px;
 }
 
 #game-description {
@@ -38,24 +39,24 @@
 }
 
 .button{
-        display: block;
-      	text-align: center;
-        line-height: 6vh;
-        color: black;
-        background: gray;
-        width: 30vh;
-        height: 6vh;
-        margin: 20px auto;
-        text-decoration: none;
-        border: 4px solid black;
-        border-radius: 10px;
+  display: block;
+  text-align: center;
+  line-height: 6vh;
+  color: black;
+  background: gray;
+  width: 30vh;
+  height: 6vh;
+  margin: 20px auto;
+  text-decoration: none;
+  border: 4px solid black;
+  border-radius: 10px;
 
 }
 
 .button:hover{
     background: black;
     color: white;
-  	border-color: gray;
+    border-color: gray;
 }
 
 #game-screen {
@@ -102,6 +103,30 @@
   text-align: right;
 }
 
+.top-bar #current-score.gain {
+  animation-name: score-gain;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes score-gain {
+  0% { font-size: 100%; }
+  100% { font-size: 125%; color: yellow}
+}
+
+.timer-end-soon {
+  animation-name: end-soon;
+  animation-duration: 0.8s;
+  animation-iteration-count: infinite;
+  color: red;
+}
+
+@keyframes end-soon {
+  0% { transform: rotate(-30deg) }
+  50% { transform: rotate(30deg) }
+  100% { transform: rotate(-30deg) }
+}
+
 .top-bar #time {
   flex-grow: 2;
   text-align: center;
@@ -116,6 +141,12 @@
   height: 35vw;
   margin: 0 10%;
   position: relative;
+  opacity: 1;
+  transition: all 2s;
+}
+
+#maze.game-over {
+  opacity: 0.3;
 }
 
 #maze img {
@@ -132,7 +163,6 @@
   border-radius: 10px;
   background-color: grey;
 }
-
 
 body{
   background-color: black;
@@ -167,8 +197,20 @@ body{
 }
 
 @keyframes gameover-animation {
-      from { transform: rotate(0deg); font-size: 1px; opacity: 0; }
-      to   { transform: rotate(720deg); font-size: 100%; opacity: 1; }
+  from { transform: rotate(0deg); font-size: 1px; opacity: 0; }
+  to   { transform: rotate(720deg); font-size: 100%; opacity: 1; }
+}
+
+.ghost {
+  animation-name: ghost;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes ghost {
+  0% { opacity: 1; transform: rotate(15deg); }
+  50% { opacity: 0.5; transform: rotate(-15deg); }
+  100% { opacity: 1; transform: rotate(15deg); }
 }
 
 #game-result{
