@@ -178,6 +178,17 @@ body{
   transition: all 0.3s;
 }
 
+#pac-man.damage {
+  animation-name: damage;
+  animation-duration: 0.2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes damage {
+  0% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
 .coin {
   animation: coin-rotate 2s linear 0s infinite;
 }

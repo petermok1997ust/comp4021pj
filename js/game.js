@@ -5,7 +5,7 @@ const CELL_HEIGHT = 100/NB_ROW;
 const MOVE_DURATION = 150;
 const MONSTER_MOVE_DURATION = 1000;
 const NUM_MONSTER = 5;
-const LOST_TEXT = "YOU ARE LOST";
+const LOST_TEXT = "YOU LOSE";
 const VICTORY_TEXT = "YOU WIN!";
 const ULTRA_MODE_TIME = 10*1000;//10 second
 const REBORN_TIME = 10*1000;//10 second
@@ -26,6 +26,7 @@ var monsterMoveTaskId;
 var scoreTaskId;
 var ultraMode = false;
 var ultraTimeout;
+var damageTimeout;
 var audioCoin;
 var audioDamage;
 var audioStartScreen;
@@ -340,35 +341,30 @@ function afterPlayerMove(x, y) {
   for(var i = pills.length-1; i >= 0; i--) {
     var pill = pills[i];
     if(pill.x === x && pill.y === y) {
-      console.log("hi");
-      clearTimeout(ultraTimeout);
       pill.obj.animate({ top: ((y-1)*CELL_HEIGHT)+'%' }, 1000)
       .delay(MOVE_DURATION)
       .css({ display:"none" }, 500);
       pills.splice(i, 1);
-      ultraMode = true;
-      for(var i = monsters.length-1; i >= 0; i--) {
-        var monster = monsters[i];
-        monster.obj.css({
-          'background-color': 'blue'
-        });
-      }
-
-      ultraTimeout = setTimeout(function(){
-        ultraMode = false;
-        for(var i = monsters.length-1; i >= 0; i--) {
-          var monster = monsters[i];
-          monster.obj.css({
-            'background-color':""
-          });
-        }
-      }, ULTRA_MODE_TIME);
-
+      
+      setUltraMode(true);
       setCellFree(pill.x, pill.y);
     }
   }
 
   if(coins.length <= 0) showVictory();
+}
+
+function setUltraMode(enter) {
+  if(enter) {
+    clearTimeout(ultraTimeout);
+    $('#pac-man').attr('src', 'img/pac-man-ultra.svg');
+    ultraTimeout = setTimeout(function() {
+      setUltraMode(false);
+    }, ULTRA_MODE_TIME);
+  } else {
+    $('#pac-man').attr('src', 'img/pac-man.svg');
+  }
+  ultraMode = enter;
 }
 
 function getKilled(monster){
@@ -390,13 +386,11 @@ function onGetDamage() {
     audioDamage.play();
     
     
-    $('#pac-man').css({
-		'background-color': 'red'
-	});
-	setTimeout(function(){
-		$('#pac-man').css({
-			'background-color': ''
-		});},2000);
+    $('#pac-man').addClass('damage');
+    if(damageTimeout) clearTimeout(damageTimeout);
+	  damageTimeout = setTimeout(function() {
+      $('#pac-man').removeClass('damage')
+    }, 2000);
   }
 }
 
