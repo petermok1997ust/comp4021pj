@@ -233,3 +233,7 @@ body{
         animation-timing-function: linear;
         animation-iteration-count: 1;
 }
+
+#restart-game{
+  display: none;
+}

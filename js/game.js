@@ -234,6 +234,7 @@ function gameOver() {
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
     audioLose.play();
+    $("#restart-game").hide();
 }
 
 function showVictory() {
@@ -244,6 +245,7 @@ function showVictory() {
     $("#result-score").text(score);
     $("#game-result").show(MOVE_DURATION);
     audioVictory.play();
+    $("#restart-game").hide();
 }
 
 function countDown() {
@@ -275,6 +277,8 @@ function afterShowGameScreen() {
   $('#current-life').text(life);
   $('#current-time').text(time);
   $('#current-score').text(score);
+  $("#restart-game").show();
+
 
   // add control
   $(document).keydown(function(e) {
@@ -345,7 +349,7 @@ function afterPlayerMove(x, y) {
       .delay(MOVE_DURATION)
       .css({ display:"none" }, 500);
       pills.splice(i, 1);
-      
+
       setUltraMode(true);
       setCellFree(pill.x, pill.y);
     }
@@ -384,8 +388,8 @@ function onGetDamage() {
     if(life <= 0) gameOver();
     $('#current-life').text(life);
     audioDamage.play();
-    
-    
+
+
     $('#pac-man').addClass('damage');
     if(damageTimeout) clearTimeout(damageTimeout);
 	  damageTimeout = setTimeout(function() {
@@ -493,6 +497,25 @@ function restart() {
     $('#current-time').removeClass('timer-end-soon');
 }
 
+
+
+function restartGame() {
+  clearInterval(countDownTaskId);
+  clearTimeout(monsterMoveTaskId);
+    monsters = [];
+    coins = [];
+    pills = [];
+    moving = false;
+    keydown = false;
+    life = 3;
+    time = 120;
+    score = 0;
+    playerXY = [1, 1];
+    $('#maze').empty();
+    afterShowGameScreen();
+    $("#game-result").fadeOut(500);
+}
+
 $(function() {
     $("#start-button").click(function(){
       $("#start-screen").hide();
@@ -509,5 +532,8 @@ $(function() {
     audioStartScreen.addEventListener('ended', function() {
         this.play(); // repeat forever
     }, false);
+
+    $('#restart-game').click(restartGame);
+
 
 });
